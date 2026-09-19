@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>Quick Recall Buzzer</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F1A2B">
+<title>Ashland Governor's Cup Practice</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
 <style>
   :root {
@@ -29,6 +31,7 @@
     font-size: 18px;
     line-height: 1.4;
     -webkit-user-select: none; user-select: none;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   #app {
     min-height: 100%;
@@ -107,7 +110,7 @@
   .btn:focus-visible, .chip:focus-visible { outline: 3px solid var(--go); outline-offset: 3px; }
 
   .setup { display: grid; gap: 20px; justify-items: center; }
-  .setup h1 { font-family: var(--display); font-size: clamp(44px, 8vw, 96px); line-height: .95; margin: 0; letter-spacing: .03em; }
+  .setup h1 { font-family: var(--display); font-size: clamp(38px, 6.5vw, 84px); line-height: .95; margin: 0; letter-spacing: .03em; }
   .setup h1 span { color: var(--amber); }
   .setup p { margin: 0; max-width: 34em; color: var(--ink-dim); font-size: clamp(16px, 1.8vw, 21px); }
   .chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
@@ -163,7 +166,20 @@
   @media (max-width: 480px) {
     #app { padding-inline: 16px; }
     .rules { grid-template-columns: 1fr; }
+    .answer { font-size: clamp(28px, 9vw, 48px); }
+    .question { font-size: clamp(20px, 5.5vw, 26px); }
+    .buzz-banner { font-size: 18vw; }
+    header { font-size: 12px; }
+    .btn { padding: 14px 20px; }
+    .clock { width: 120px; }
+    main { gap: 18px; padding-block: 12px; }
+    .stage-label { font-size: 14px; letter-spacing: .08em; }
+    .recap { font-size: 14px; }
   }
+  @media (hover: none) and (pointer: coarse) {
+    .hint kbd, .key-only { display: none !important; }
+  }
+  .touch .hint kbd, .touch .key-only { display: none !important; }
 </style>
 
 <style>[hidden]{display:none!important} html,body{margin:0}</style>
@@ -171,11 +187,11 @@
 <body>
 <div id="app" tabindex="0">
   <header>
-    <div>Quick Recall <b id="setname"></b></div>
+    <div>Ashland Governor's Cup Practice <b id="setname"></b></div>
     <div id="progress"></div>
   </header>
   <main id="main"></main>
-  <footer id="foot">Progress is saved on this device only. Questions from KAAC Governor's Cup elementary Quick Recall sets: 2022-23 League practice, 2022 Regional, 2023 District, and 2023 Regional</footer>
+  <footer id="foot">Ashland Elementary · Progress is saved on this device only.</footer>
 </div>
 
 <script>
@@ -216,7 +232,7 @@ function ding(){
   } catch (e) {}
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function lock(ms){ lockUntil = Date.now() + ms; }
+function lock(ms){ lockUntil = Date.now() + ms; try { window.scrollTo(0, 0); } catch (e) {} }
 // Buttons that end or restart a round need two clicks a moment apart, so a stray click can't trigger them.
 function armed(btn, label, action){
   let timer = null;
@@ -240,23 +256,20 @@ function renderSetup(){
   const missedCount = store.missed.length;
   main.innerHTML = `
     <div class="setup">
-      <h1>Quick <span>Recall</span></h1>
-      <p>${ALL.length.toLocaleString()} practice questions from Governor's Cup, always in a random order. Read the question, start the clock, buzz in, say your answer out loud, then tell the app if you got it.</p>
+      <h1>Ashland <span>Governor's Cup</span><br>Practice App</h1>
+      <p>Read the question, start the clock, buzz in, and say your answer out loud. Then check it and tell the app if you got it right.</p>
       <div class="subhead">How many questions this time</div>
       <div class="chips" role="group" aria-label="Round length">
         ${[10,20,30,0].map(n => `<button class="chip" data-len="${n}" aria-pressed="${roundLen===n}">${n === 0 ? 'Keep going' : n + ' questions'}</button>`).join('')}
       </div>
-      ${missedCount ? `<div class="chips"><button class="chip" id="retry">Practice the ${missedCount} you missed before</button></div>` : ''}
       <div class="rules">
-        <div class="rule"><b><i>1</i>Question appears</b>Read it, then press Start to begin the 10 second clock.</div>
-        <div class="rule"><b><i>2</i>Buzz in</b>Click anywhere or press any key. You will hear a ding.</div>
-        <div class="rule"><b><i>3</i>Say it out loud</b>Give your answer, then click to check it.</div>
+        <div class="rule"><b><i>1</i>Question appears</b>Read it, then tap Start to begin the 10 second clock.</div>
+        <div class="rule"><b><i>2</i>Buzz in</b>Tap or click anywhere, or press any key. You will hear a ding.</div>
+        <div class="rule"><b><i>3</i>Say it out loud</b>Give your answer, then tap to check it. Remember... no hesitation!</div>
       </div>
       <button class="btn" id="start">Start</button>
-      ${seenCount ? `<div class="recap">This device has seen ${seenCount.toLocaleString()} of the ${ALL.length.toLocaleString()} questions so far. New ones come first.</div>` : ''}
     </div>`;
   main.querySelectorAll('.chip[data-len]').forEach(b => b.onclick = e => { e.stopPropagation(); roundLen = +b.dataset.len; persist(); renderSetup(); });
-  const retry = main.querySelector('#retry'); if (retry) retry.onclick = e => { e.stopPropagation(); startGame(store.missed.map(id => BY_ID.get(id)).filter(Boolean)); };
   main.querySelector('#start').onclick = e => { e.stopPropagation(); startGame(); };
 }
 
@@ -299,7 +312,7 @@ function showQuestion(){
     <div class="chips">
       <button class="btn" id="startclock">Start the clock</button>
     </div>
-    <div class="hint" id="hint">Press <kbd>Start</kbd> or any key when you are ready</div>`;
+    <div class="hint" id="hint">Tap Start<span class="key-only"> or press any key</span> when you are ready</div>`;
   main.querySelector('#startclock').onclick = e => { e.stopPropagation(); startClock(); };
   lock(600);
 }
@@ -308,7 +321,7 @@ function startClock(){
   if (state !== 'ready') return;
   state = 'question';
   const ch = main.querySelector('.chips'); if (ch) ch.remove();
-  document.getElementById('hint').innerHTML = 'Click anywhere or press <kbd>any key</kbd> to buzz in';
+  document.getElementById('hint').innerHTML = 'Tap or click anywhere<span class="key-only"> or press <kbd>any key</kbd></span> to buzz in';
   const arc = document.getElementById('arc'), digits = document.getElementById('digits'), clock = document.getElementById('clock');
   lock(400);
   requestAnimationFrame(() => { arc.style.strokeDashoffset = CIRC / SECONDS; });
@@ -329,7 +342,7 @@ function showBuzzed(){
   main.innerHTML = `
     <div class="buzz-banner">Buzz!</div>
     <p class="buzz-sub">Say your answer <b>out loud</b> right now.<br>Buzzed with ${remaining} second${remaining===1?'':'s'} left.</p>
-    <div class="hint">Click or press <kbd>any key</kbd> to show the answer</div>`;
+    <div class="hint">Tap or click<span class="key-only"> or press <kbd>any key</kbd></span> to show the answer</div>`;
   lock(700);
 }
 
@@ -344,7 +357,7 @@ function showReveal(timedOut){
       <button class="btn go" id="gotit">I got it right</button>
       <button class="btn miss" id="missed">I missed it</button>
     </div>
-    <div class="hint">Or press <kbd>Y</kbd> for right, <kbd>N</kbd> for missed</div>`;
+    <div class="hint key-only">Or press <kbd>Y</kbd> for right, <kbd>N</kbd> for missed</div>`;
   main.querySelector('#gotit').onclick = e => { e.stopPropagation(); record(true, timedOut); };
   main.querySelector('#missed').onclick = e => { e.stopPropagation(); record(false, timedOut); };
   lock(500);
@@ -414,6 +427,7 @@ document.addEventListener('keydown', e => {
   advance();
 });
 
+if (navigator.maxTouchPoints > 0 || 'ontouchstart' in window) document.body.classList.add('touch');
 renderSetup();
 app.focus();
 </script>
