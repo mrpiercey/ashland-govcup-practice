@@ -423,7 +423,7 @@ function showTestQuestion(){
   updateTestHeader();
   main.innerHTML = `
     <div class="wa">
-      <div class="stage-label">${q.tie ? 'Tiebreaker · ' : ''}${esc(q.label)}${q.practice ? '' : ' · #' + esc(q.num)}</div>
+      ${q.tie ? '<div class="stage-label">Tiebreaker</div>' : ''}
       ${q.ctx ? `<p class="ctx">${esc(q.ctx)}</p>` : ''}
       ${q.img ? `<img class="fig" src="${q.img}" alt="Figure for this question">` : ''}
       <p class="question wa-q">${esc(q.q)}</p>
@@ -503,7 +503,6 @@ function renderTestDone(timedOut){
       ${q.img ? `<img class="fig small" src="${q.img}" alt="">` : ''}
       <div class="ra">${q.ans}. ${esc(q.choices[ai] || '')}</div>
       ${r.correct ? '' : `<div class="rp wrong">${r.pick ? `You picked ${r.pick}. ${esc(q.choices[LET.indexOf(r.pick)] || '')}` : 'Not answered'}</div>`}
-      <div class="rs">${esc(q.label)}${q.practice ? '' : ' · #' + esc(q.num)}</div>
     </li>`;
   };
   main.innerHTML = `
@@ -529,7 +528,7 @@ function renderTestDone(timedOut){
 const SECTIONS = ['Quick Recall', 'Science', 'Math', 'Language Arts', 'Arts and Humanities', 'Social Studies']
   .map(name => ({ name, live: name === 'Quick Recall' || !!TESTS_BY_SUBJECT[name] }));
 function renderHome(){
-  clearInterval(timerId); clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null;
+  clearInterval(timerId); clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null; clearInterval(tTimer); tTimer = null;
   state = 'home'; results = []; progress.textContent = ''; setname.textContent = '';
   document.getElementById('section').textContent = '';
   document.getElementById('homebtn').hidden = true;
