@@ -605,7 +605,6 @@ function showQuestion(){
     ` <button class="tiny" id="finish">Finish and review</button>`;
   armed(progress.querySelector('#finish'), 'Click again to finish', () => { clearInterval(timerId); renderDone(); });
   main.innerHTML = `
-    <div class="stage-label">${esc(q.source)} · #${esc(q.num)}</div>
     <p class="question">${esc(q.q)}</p>
     ${clockMarkup()}
     <div class="chips">
@@ -682,7 +681,7 @@ function renderDone(){
   const t = tally();
   const missed = results.filter(r => !r.correct).map(r => BY_ID.get(r.id));
   const right = results.filter(r => r.correct).map(r => BY_ID.get(r.id));
-  const item = (q, cls) => `<li class="${cls}"><div class="rq">${esc(q.q)}</div><div class="ra">${esc(q.a)}</div><div class="rs">${esc(q.source)} · #${esc(q.num)}</div></li>`;
+  const item = (q, cls) => `<li class="${cls}"><div class="rq">${esc(q.q)}</div><div class="ra">${esc(q.a)}</div></li>`;
   const pct = results.length ? Math.round(100 * t.right / results.length) : 0;
   main.innerHTML = `
     <div class="stage-label">${results.length ? 'Round complete' : 'No questions answered yet'}</div>
